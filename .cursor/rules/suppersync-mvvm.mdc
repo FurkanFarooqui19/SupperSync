@@ -1,0 +1,45 @@
+---
+description: SupperSync Flutter MVVM rules — no setState, Provider, design system
+alwaysApply: true
+---
+
+# SupperSync Architecture Rules
+
+## Architecture
+- Use **MVVM**: Views → ViewModels (ChangeNotifier) → Repositories → Supabase
+- State management: **Provider** only (`ChangeNotifierProvider`, `context.watch` / `context.read`)
+- Navigation: **go_router** via `AppRouter` / `RouteNames`
+
+## Forbidden
+- **Never call `setState()`** anywhere in this project
+- Do not introduce `StatefulWidget` that relies on `setState`
+- For local UI state (password visibility, form controllers, toggles), use a dedicated `ChangeNotifier` + `ChangeNotifierProvider`, or `ValueNotifier` + `ValueListenableBuilder`
+- Do not hardcode colors, spacing, or copy — use `AppColors`, `AppDimensions`, `AppStrings`, `AppTextStyles`
+- Do not put Supabase/network calls in Views — only in Repositories, invoked by ViewModels
+
+## Allowed local state patterns
+```dart
+// Form controllers live in a ChangeNotifier
+class LoginFormController extends ChangeNotifier { ... }
+
+// Or ValueNotifier for a single field
+ValueListenableBuilder<bool>(
+  valueListenable: obscurePassword,
+  builder: (_, obscure, __) => ...,
+)
+```
+
+## Folder structure
+```
+lib/
+  core/          # theme, router, constants, utils, errors
+  data/          # models, repositories
+  presentation/
+    viewmodels/
+    views/
+    widgets/
+```
+
+## Theming
+- Always support light and dark via `ThemeViewModel` + `AppTheme`
+- Prefer `Theme.of(context)` and design tokens over raw colors when possible
